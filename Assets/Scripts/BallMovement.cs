@@ -1,52 +1,54 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class BallMovement : MonoBehaviour
 {
-    public float speed = 5f;
-    
-    private Rigidbody2D rb; //rb reference to Rigidbody2D component
-    private Vector2 lastVelocity; // going to let us hold a velocity before it hits a wall since when it hits the wall it is 0 so if you reverse it's still 0.
+    [SerializeField] private float speed = 5f;                 // private field
+    [SerializeField] private Vector2 direction = new Vector2(1f, 1f); // private field
+
+    private Rigidbody2D rb;
+    private Vector2 lastVelocity;
+
+    public float Speed
+    {
+        get => speed;
+        set => speed = Mathf.Max(0f, value); // prevents negative speed
+    }
+
+    public Vector2 Direction
+    {
+        get => direction;
+        set => direction = value.normalized; // keeps it normalized
+    }
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        direction = direction.normalized;
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    private void Start()
     {
-        rb.linearVelocity = new Vector2(1f, 1f).normalized * speed;
-        
-        /*Vector2 direction = new Vector2(1, 1).normalized; //normalized prevents accidental speed boosts
-        rb.linearVelocity = direction * speed; // Applies movement */
+        rb.linearVelocity = direction * speed;
     }
 
     private void FixedUpdate()
     {
-        lastVelocity = rb.linearVelocity; // saves the velocity before unity resolves collision.
-    }
+        // Cache velocity before collision resolution
+        lastVelocity = rb.linearVelocity;
 
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        Debug.Log("Hit: " + collision.gameObject.name); //Print name of what ball hits
-
-        //Check the tag of either TopWall or BottomWall.
-        if (collision.gameObject.CompareTag("TopWall") || collision.gameObject.CompareTag("BottomWall")) 
+        // Keeps constant speed over time
+        if (rb.linearVelocity.sqrMagnitude > 0.0001f)
         {
-            rb.linearVelocity = new Vector2(lastVelocity.x, -lastVelocity.y);
+            rb.linearVelocity = rb.linearVelocity.normalized * speed;
+        }
+    }
 
-            //rb.linearVelocity = new Vector2(rb.linearVelocity.x, -rb.linearVelocity.y);
-            /*Vector2 velocity = rb.linearVelocity; // Copies current velocity into local variable. We do it because we can't safely modify part of rb.veloctiy directly. So we copy it, modify the copy, then assign it back.
-            velocity.y *= -1; // This is the bounce. *= reverses y velocity.
-            rb.linearVelocity = velocity; // applies modified velocity back to the Rigidbody. */
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("TopWall") || collision.gameObject.CompareTag("BottomWall"))
+        {
+            // Bounce using incoming velocity
+            rb.linearVelocity = new Vector2(lastVelocity.x, -lastVelocity.y).normalized * speed;
         }
     }
 }
