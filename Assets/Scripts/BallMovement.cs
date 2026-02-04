@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BallMovement : MonoBehaviour
 {
-    [SerializeField] private float speed = 5f;                 // private field
+    [SerializeField] private float speed = 5f; // private field
     [SerializeField] private Vector2 direction = new Vector2(1f, 1f); // private field
 
     private Rigidbody2D rb;
@@ -43,12 +43,25 @@ public class BallMovement : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.CompareTag("TopWall") || collision.gameObject.CompareTag("BottomWall"))
+        if (collision.gameObject.CompareTag("TopWall") ||
+            collision.gameObject.CompareTag("BottomWall"))
         {
-            // Bounce using incoming velocity
-            rb.linearVelocity = new Vector2(lastVelocity.x, -lastVelocity.y).normalized * speed;
+            rb.linearVelocity = new Vector2(
+                lastVelocity.x,
+                -lastVelocity.y
+            ).normalized * Speed;
+
+            return;
+        }
+
+        if (collision.gameObject.GetComponent<PaddleController>() != null)
+        {
+            rb.linearVelocity = new Vector2(
+                -lastVelocity.x,
+                lastVelocity.y
+            ).normalized * Speed;
         }
     }
 }

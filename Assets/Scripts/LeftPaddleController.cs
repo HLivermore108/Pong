@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public class LeftPaddleController
+public class LeftPaddleController : PaddleController
 {
-    
+    protected override string GetAxisName()
+    {
+        return "LeftPaddle";
+    }
 }
