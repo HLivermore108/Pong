@@ -1,10 +1,9 @@
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PaddleController : MonoBehaviour
+public abstract class PaddleController : MonoBehaviour, ICollidable
 {
     [SerializeField] protected float moveSpeed = 8f;
-
     protected Rigidbody2D rb;
 
     protected virtual void Awake()
@@ -15,14 +14,16 @@ public class PaddleController : MonoBehaviour
         rb.freezeRotation = true;
     }
 
-    protected virtual string GetAxisName()
-    {
-        return "Vertical"; // fallback default
-    }
+    protected abstract float GetMovementInput();
 
     protected virtual void FixedUpdate()
     {
-        float input = Input.GetAxis(GetAxisName()); // -1..1
+        float input = GetMovementInput();
         rb.linearVelocity = new Vector2(0f, input * moveSpeed);
+    }
+
+    public virtual void OnHit(Collision2D collision)
+    {
+
     }
 }

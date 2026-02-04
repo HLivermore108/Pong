@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class BallMovement : MonoBehaviour
+public class BallMovement : MonoBehaviour, ICollidable
 {
     [SerializeField] private float speed = 5f; // private field
     [SerializeField] private Vector2 direction = new Vector2(1f, 1f); // private field
@@ -45,6 +45,18 @@ public class BallMovement : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        ICollidable collidable =
+            collision.gameObject.GetComponent<ICollidable>();
+
+        if (collidable != null)
+        {
+            collidable.OnHit(collision);
+        }
+    }
+
+    public void OnHit(Collision2D collision)
+    {
+        // Wall bounce Y flip
         if (collision.gameObject.CompareTag("TopWall") ||
             collision.gameObject.CompareTag("BottomWall"))
         {
@@ -56,6 +68,7 @@ public class BallMovement : MonoBehaviour
             return;
         }
 
+        // Paddle bounce X flip
         if (collision.gameObject.GetComponent<PaddleController>() != null)
         {
             rb.linearVelocity = new Vector2(
@@ -64,4 +77,5 @@ public class BallMovement : MonoBehaviour
             ).normalized * Speed;
         }
     }
+
 }
