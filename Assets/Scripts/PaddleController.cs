@@ -1,7 +1,6 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D))]
-public abstract class PaddleController : MonoBehaviour, ICollidable
+public abstract class PaddleController : NetworkedObject, ICollidable
 {
     [SerializeField] protected float moveSpeed = 8f;
     protected Rigidbody2D rb;
@@ -9,7 +8,6 @@ public abstract class PaddleController : MonoBehaviour, ICollidable
     protected virtual void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
-
         rb.gravityScale = 0f;
         rb.freezeRotation = true;
     }
@@ -24,6 +22,21 @@ public abstract class PaddleController : MonoBehaviour, ICollidable
 
     public virtual void OnHit(Collision2D collision)
     {
+        BallMovement ball = collision.otherCollider.GetComponent<BallMovement>();
+        if (ball == null) return;
+
+        ball.BounceHorizontal(collision);
+        ball.ToggleColor();
+    }
+
+    public override void Initialize()
+    {
 
     }
+
+    public override int GetNetworkId()
+    {
+        return gameObject.GetInstanceID();
+    }
+
 }
