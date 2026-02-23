@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using Unity.Netcode;
 
 public class BallSpawner : MonoBehaviour
@@ -10,7 +10,6 @@ public class BallSpawner : MonoBehaviour
 
     private void Update()
     {
-        // Wait until networking is started and on the server
         if (hasSpawned) return;
         if (NetworkManager.Singleton == null) return;
         if (!NetworkManager.Singleton.IsServer) return;
@@ -21,11 +20,19 @@ public class BallSpawner : MonoBehaviour
 
     private void SpawnBall()
     {
-        if (hasSpawned) return;
         hasSpawned = true;
 
         spawnedBall = Instantiate(ballPrefab, Vector3.zero, Quaternion.identity);
         spawnedBall.Spawn();
-        Debug.Log("Server spawned ball.");
+
+        // ✅ Tell GameManager which ball to control
+        GameManager gm = FindFirstObjectByType<GameManager>();
+        if (gm != null)
+        {
+            BallMovement bm = spawnedBall.GetComponent<BallMovement>();
+            gm.SetBallReference(bm);
+        }
+
+        Debug.Log("Server spawned ball and assigned it to GameManager.");
     }
 }
